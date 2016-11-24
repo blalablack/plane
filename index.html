@@ -276,19 +276,21 @@
 		/**
 		 * 创建  Loading 的业务对象
 		 */
-		var Loading = function(config){
+		class Loading{
 			//config:表示LOADING数据对象
-			this.frames = config.frames;
-			this.width = config.width;
-			this.height=  config.height;
-			this.x = 0;
-			this.y = HEIGHT - this.height;
-			this.speed = config.speed;
-			this.lastTime = 0;
-			this.frameIndex = 0;
-			this.frame = this.frames[0];
+			constructor(config){
+				this.frames = config.frames;
+				this.width = config.width;
+				this.height=  config.height;
+				this.x = 0;
+				this.y = HEIGHT - this.height;
+				this.speed = config.speed;
+				this.lastTime = 0;
+				this.frameIndex = 0;
+				this.frame = this.frames[0];
+			}
 			//更新frameIndex的值，并且取出最新图像
-			this.step = function(){
+			step(){
 				var currentTime = new Date().getTime();
 				if(currentTime - this.lastTime >= this.speed){
 					//根据frameIndex取出最新的loading图像
@@ -302,7 +304,7 @@
 				}
 			}
 			//绘图
-			this.paint = function(ctx){
+			paint(){
 				ctx.drawImage(this.frame,this.x,this.y);
 			}
 		}
