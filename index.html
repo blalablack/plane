@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
  <head>
-  <title> 飞机大战-背景(面向对象) </title>
+  <title>飞机大战</title>
   <meta charset="utf-8" />
  </head>
  <body>
@@ -12,22 +12,22 @@
 	</div>
 	<script>
         //获取canvas元素
-        let canvas = document.getElementById("canvas");
-        ctx  = canvas.getContext("2d");
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
 		//获取容器(canvas)的宽和高
 		const WIDTH = 480;
         const HEIGHT = 650;
-		//游戏的分数，英雄的生命数
+		//游戏的分数，英雄的生命数,他么会改变要用let
 		let SCORE = 0;
         let LIFE = 3;
-		//天空背景图像
-		let bg = new Image();
+		//创建天空背景图像
+		const bg = new Image();
 		bg.src = "img/background.png";
 		//创建子弹图像
-        let bulletImg = new Image();
+        const bulletImg = new Image();
 		bulletImg.src = "img/bullet1.png";
 		//创建 loading的图像
-        let loading = [];
+		const loading = [];
 		loading[0] = new Image();
 		loading[0].src = "img/game_loading1.png";
 		loading[1] = new Image();
@@ -37,7 +37,7 @@
 		loading[3] = new Image();
 		loading[3].src = "img/game_loading4.png";
 		//创建 hero的图像列表
-        let h = [];
+		const h = [];
 		h[0] = new Image();
 		h[0].src="img/hero1.png";
 		h[1] = new Image();
@@ -51,7 +51,7 @@
 		h[5] = new Image();
 		h[5].src="img/hero_blowup_n4.png";
 		//创建小飞机图像
-        let e1 = [];
+		const e1 = [];
 		e1[0] = new Image();
 		e1[0].src="img/enemy1.png";
 		e1[1] = new Image();
@@ -63,7 +63,7 @@
 		e1[4] = new Image();
 		e1[4].src="img/enemy1_down4.png";
 		//创建中飞机图像
-        let e2 = [];
+		const e2 = [];
 		e2[0] = new Image();
 		e2[0].src="img/enemy2.png";
 		e2[1] = new Image();
@@ -75,7 +75,7 @@
 		e2[4] = new Image();
 		e2[4].src="img/enemy2_down4.png";
 		//创建大飞机
-        let e3 = [];
+		const e3 = [];
 		e3[0] = new Image();
 		e3[0].src="img/enemy3_n1.png";
 		e3[1] = new Image();
@@ -98,34 +98,37 @@
         const RUNNING = 2;
         const PAUSE = 3;
         const GAMEOVER = 4;
-		let state = START; //当前游戏状态，默认为START
-		/********数据对象**********/
+		 //当前游戏状态，默认为START会变化
+		let state = START;
+		/********数据对象定义各种基本数据**********/
 		const SKY = {image:bg,width:480,height:852,speed:50};
         const LOADING = {frames:loading,width:186,height:38,speed:100};
-        const HERO = {frames:h,width:99,height:124,speed:20,baseFrameCount:2};
+        const HERO = {frames:h,width:99,height:124,speed:20,baseFrameCount:2};//speed是英雄的刷新频率
         const E1 = {type:1,score:1,life:1,minSpeed:10,maxSpeed:30,frames:e1,width:57,height:51,baseFrameCount:1};
         const E2 = {type:2,score:5,life:5,minSpeed:30,maxSpeed:70,frames:e2,width:69,height:95,baseFrameCount:1};
         const E3 = {type:3,score:20,life:20,speed:100,frames:e3,width:169,height:258,baseFrameCount:2};
-        const BULLET = {background:bulletImg,width:9,height:21,speed:20};
+        const BULLET = {background:bulletImg,width:9,height:21,speed:20};//子弹的刷新频率
 
-		/**
-		 * 创建Bullet的业务对象
-		 */
+		/**创建Bullet的业务对象*/
 		class Bullet{
+			//定义在他自己上的属性方法
 		    constructor(config){
                 this.background  = config.background;
                 this.width = config.width;
                 this.height = config.height;
                 this.speed = config.speed;
                 this.lastTime = 0;
+				//这俩决定子弹初始位置
                 this.x = hero.x + hero.width / 2 - this.width / 2;
                 this.y = hero.y - this.height;
-                this.canDelete = false ; //是否删除当前组件
+				//是否删除当前组件
+                this.canDelete = false ;
             }
+            //Bullet的原型的属性方法
 			step(){
-				var currentTime = new Date().getTime();
+				let currentTime = new Date().getTime();
 				if(currentTime - this.lastTime >= this.speed){
-					this.y -= 5;
+					this.y -= 5;//这里决定每次位移距离
 					this.lastTime = currentTime;
 				}
 			}
@@ -140,19 +143,22 @@
 		/******根据Enemy、Hero 提炼父级对象Component******/
 		class Component{
 			//config为数据对象
+			//定义在他自己上的属性方法
             constructor(config) {
-				this.down = false;
-				this.canDelete = false;
+				this.down = false;//是否爆破
+				this.canDelete = false;//是否删除
 				this.width = config.width;
 				this.height = config.height;
 				this.frames = config.frames;
 				this.frame = this.frames[0];
+				//开始是第一张正常图
 				this.frameIndex = 0;
+				//有几张图片baseFrameCount就是多少
 				this.baseFrameCount = config.baseFrameCount;
 				this.lastTime = 0;
 				this.x = 0;
 				this.y = 0;
-				if (config.minSpeed && config.maxSpeed) {
+				if (config.minSpeed && config.maxSpeed) {//这是敌人的速度
 					this.speed = Math.random() * (config.maxSpeed - config.minSpeed) + config.minSpeed;
 				} else if (config.speed) {
 					this.speed = config.speed;
@@ -161,28 +167,73 @@
             paint(ctx){
                 ctx.drawImage(this.frame, this.x, this.y);
             }
-
-
 		}
-		/**
-		 * 创建Enemy的业务对象(e1,e2,e3)
-		 */
+		/*******创建Hero的业务对象****/
+
+		class Hero extends Component{
+			constructor(config){
+				super(config);
+				//hero自己添加的属性
+				this.x = (WIDTH - this.width) / 2;
+				this.y = HEIGHT - this.height;
+				//发射子弹
+				this.shootLastTime = 0;
+				//发射时间间隔
+				this.shootInterval = 200;
+			}
+
+			//英雄撞击后的操作
+			bang(){
+				this.down = true;//更改为爆破状态
+				//切换到爆破帧
+				this.frameIndex = this.baseFrameCount;
+			}
+			step(){
+				var currentTime = new Date().getTime();
+				if(currentTime - this.lastTime >= this.speed){//刷新频率
+					if(this.down){
+						//爆破状态下
+						this.frame = this.frames[this.frameIndex];
+						this.frameIndex ++;
+						//是否播放完所有的爆破帧
+						if(this.frameIndex == this.frames.length){
+							this.canDelete = true; //允许被删除
+						}
+					}else{
+						//正常状态下的显示
+						this.frame = this.frames[this.frameIndex % this.baseFrameCount];//0和1来回切换
+						this.frameIndex ++;
+					}
+					this.lastTime = currentTime;
+				}
+			}
+			shoot(){
+				var currentTime = new Date().getTime();
+				if(currentTime - this.shootLastTime >= this.shootInterval){
+					//创建子弹并且添加到子弹数组中
+					bullets.push(new Bullet(BULLET));
+					this.shootLastTime = currentTime;
+				}
+			}
+		}
+		/***创建Enemy的业务对象(e1,e2,e3)**/
 		class Enemy extends Component {
+			//由config来决定到底创建哪种飞机的业务对象
             constructor(config){
-                super(config);
+                super(config);//这里super当做函数使用，代表调用父类的构造函数,必须要调用一次。
+				// 还有一种情况当做对象使：用super作为对象时，指向父类的原型对象 可以调用父原型的方法。例如super.paint();
                 this.type = config.type;
                 this.score = config.score;
                 this.life = config.life;
                 this.x = Math.random() * (WIDTH-this.width);
                 this.y = -this.height;
             }
-			//由config1来决定到底创建哪种飞机的业务对象
-
 			//敌人与其他组件撞击后执行的操作
 			bang (){
 				this.life --;
 				if(this.life == 0){
 					this.down = true;
+					//切换到爆破状态
 					this.frameIndex = this.baseFrameCount;
 				}
 			}
@@ -203,6 +254,7 @@
 						this.frame = this.frames[this.frameIndex % this.baseFrameCount];
 						this.frameIndex ++;
 						//2、移动飞机
+						//速度可以在数据对象中自己设定
 						this.y ++;
 					}
 					this.lastTime = currentTime;
@@ -213,11 +265,10 @@
 				return this.y > HEIGHT;
 			}
 
-			/**
-			 * 判断撞击规则
-			 *  component 为撞击组件，可以是Hero，也可以是Bullet
-			 * 返回值 ： true ,表示撞击成功，false，表示没有撞击
-			 */
+
+			/** 判断撞击规则
+			  component 为撞击组件，可以是Hero，也可以是Bullet
+			  返回值 ： true ,表示撞击成功，false，表示没有撞击*/
 			hit(component){
 				var c = component;
 				return c.x + c.width / 2 > this.x - c.width / 2 && c.x+c.width/2 < this.x +this.width + c.width / 2 && c.y + c.height / 2 > this.y - c.height / 2 && c.y + c.height / 2 < this.y + this.height + c.height / 2;
@@ -225,57 +276,7 @@
 
 		}
 
-		/**
-		 * 创建Hero的业务对象
-		 */
-        class Hero extends Component{
-            constructor(config){
-                super(config);
-                this.x = (WIDTH - this.width) / 2;
-                this.y = HEIGHT - this.height;
-                //发射子弹
-                this.shootLastTime = 0;
-                this.shootInterval = 200; //发射时间间隔
-            }
-
-			//英雄撞击后的操作
-			bang(){
-
-				this.down = true;//更改为爆破状态
-				//切换到爆破帧
-				this.frameIndex = this.baseFrameCount;
-			}
-			step(){
-				var currentTime = new Date().getTime();
-				if(currentTime - this.lastTime >= this.speed){
-					if(this.down){
-						//爆破状态下
-						this.frame = this.frames[this.frameIndex];
-						this.frameIndex ++;
-						//是否播放完所有的爆破帧
-						if(this.frameIndex == this.frames.length){
-							this.canDelete = true; //允许被删除
-						}
-					}else{
-						//正常状态下的显示
-						this.frame = this.frames[this.frameIndex % this.baseFrameCount];
-						this.frameIndex ++;
-					}
-					this.lastTime = currentTime;
-				}
-			}
-			shoot(){
-				var currentTime = new Date().getTime();
-				if(currentTime - this.shootLastTime >= this.shootInterval){
-					//创建子弹并且添加到子弹数组中
-					bullets.push(new Bullet(BULLET));
-					this.shootLastTime = currentTime;
-				}
-			}
-		}
-		/**
-		 * 创建  Loading 的业务对象
-		 */
+		/*** 创建  Loading 的业务对象*/
 		class Loading{
 			//config:表示LOADING数据对象
 			constructor(config){
@@ -308,22 +309,23 @@
 				ctx.drawImage(this.frame,this.x,this.y);
 			}
 		}
-		/**
-		 * 天空(背景) 业务对象
-		 */
-		var Sky = function(config){
+		/*** 天空(背景) 业务对象*/
+		class Sky{
 			//config : 表示所用的数据对象 --> SKY
-			this.image = config.image; //将数据对象的属性赋值给业务对象的属性
-			this.width = config.width;
-			this.height = config.height;
-			this.speed = config.speed; //绘图的间隔时间
-			this.x1 = 0;
-			this.y1 = 0;
-			this.x2 = 0;
-			this.y2 = -this.height;
-			this.lastTime = 0;//上次执行的时间，默认为0
+			constructor(config){
+				this.image = config.image; //将数据对象的属性赋值给业务对象的属性
+				this.width = config.width;
+				this.height = config.height;
+				this.speed = config.speed; //绘图的间隔时间
+				this.x1 = 0;
+				this.y1 = 0;
+				this.x2 = 0;
+				this.y2 = -this.height;
+				this.lastTime = 0;//上次执行的时间，默认为0
+			}
+
 			/**根据时间差,更新天空的纵坐标**/
-			this.step = function(){
+			step(){
 				//获取当前时间
 				var currentTime = new Date().getTime();
 				if(currentTime - this.lastTime >= this.speed){
@@ -340,17 +342,17 @@
 				}
 			}
 			/**绘制天空**/
-			this.paint = function(ctx){
+			paint(ctx){
 				ctx.drawImage(this.image,this.x1,this.y1);
 				ctx.drawImage(this.image,this.x2,this.y2);
 			}
 		}
 		/******创建对象*******/
-		var sky = new Sky(SKY);
-		var l = new Loading(LOADING);
-		var hero = new Hero(HERO);
-		var enemies = []; //保存敌人的数组
-		var bullets = []; //保存子弹的数组
+		let sky = new Sky(SKY);
+		let l = new Loading(LOADING);
+		let hero = new Hero(HERO);
+		let enemies = []; //保存敌人的数组
+		let bullets = []; //保存子弹的数组
 		/*************检查碰撞方法**************/
 		function checkHit(){
 			for(let i = 0 ; i < enemies.length;i++){
@@ -360,7 +362,6 @@
 				}
 				//判断enemies与hero的位置状态
 				if(enemies[i].hit(hero)){
-					//console.log("碰撞成功!");
 					enemies[i].bang(); //调用碰撞后的方法
 					hero.bang();//英雄撞击后的方法
 				}
@@ -371,7 +372,6 @@
 				//判断enemies与bullet的位置关系
 				for(let j=0;j<bullets.length;j++){
 					if(enemies[i].hit(bullets[j])){
-						//console.log("干掉一架");
 						//敌人爆破
 						enemies[i].bang();
 						//更新子弹的canDelete属性
@@ -382,13 +382,12 @@
 		}
 		
 		/*********创建敌人飞机的方法**********/
-		var interval = 1000 ; //创建敌人的时间间隔
-		var lastTime = 0;
+		const interval = 1000 ; //创建敌人的时间间隔
+		let lastTime = 0;
 		function componentEnter(){
-			var currentTime = new Date().getTime();
+			let currentTime = new Date().getTime();
 			if(currentTime - lastTime >= interval){
-				//打印当前元素的个数
-				var num = Math.floor(Math.random() * 10);
+				let num = Math.floor(Math.random() * 10);
 				if(num <= 7){
 					//创建小飞机,顺便放进enemies数组中
 					enemies.push(new Enemy(E1));
@@ -396,34 +395,33 @@
 					//创建中飞机
 					enemies.push(new Enemy(E2));
 				}else if(num == 9){
-					//创建大飞机，保证第一个元素不为空，并且，第一个元素不是大飞机(enemies[0].type != 3)
+					//这里保证一个屏幕里只有一个打飞机，打死之后才能重新创建一个
 					if(enemies[0] == null || enemies[0].type != 3){
-						enemies.splice(0,0,new Enemy(E3));
+						enemies.splice(0,0,new Enemy(E3));//在0的位置加一个
 					}
 				}
 				lastTime = currentTime;
 			}
 		}
 
-		/*************让所有的元素动起来****************/
+		/*************让所有的元素调用step方法 step方法定义每一个对象来回切换图片****************/
 		function componentStep(){
 			//处理敌人飞机动起来
-			for(var i = 0 ;i < enemies.length ; i ++){
+			for(let i = 0 ;i < enemies.length ; i++){
 				enemies[i].step();
 			}
 			//让子弹飞
-			for(var i=0;i < bullets.length ; i ++){
+			for(let i=0;i < bullets.length ; i++){
 				bullets[i].step();
 			}
 		}
 
 		/***************打印所有的元素***********************/
 		function componentPaint(ctx){
-			for(var i = 0 ;i < enemies.length ; i ++){
+			for(let i = 0 ;i < enemies.length ; i++){
 				enemies[i].paint(ctx);
 			}
-
-			for(var i=0;i < bullets.length ; i ++){
+			for(let i=0;i < bullets.length ; i++){
 				bullets[i].paint(ctx);
 			}
 		}
@@ -493,7 +491,6 @@
 					checkHit();
 					//绘制文字
 					drawText(ctx);
-					
 					break;
 				case PAUSE:
 					sky.step();
