@@ -5,8 +5,8 @@
   <meta charset="utf-8" />
  </head>
  <body>
-	<div id="stage" style="margin:0px auto;width:480px;height:650px;background:#232323">
-		<canvas id="canvas" width="480" height="650">
+	<div id="stage" style="margin:0px auto;width:480px;height:600px;background:#232323">
+		<canvas id="canvas" width="480" height="600">
 			您的浏览器不支持Canvas
 		</canvas>
 	</div>
@@ -16,7 +16,7 @@
         const ctx = canvas.getContext("2d");
 		//获取容器(canvas)的宽和高
 		const WIDTH = 480;
-        const HEIGHT = 650;
+        const HEIGHT = 600;
 		//游戏的分数，英雄的生命数,他么会改变要用let
 		let SCORE = 0;
         let LIFE = 3;
@@ -512,10 +512,11 @@
 		function drawOver(ctx){
 			ctx.font = "bold 48px Verdana";
 			ctx.textAlign = "left";
-			var width = ctx.measureText("GAME OVER").width;
+			var width = ctx.measureText("革命尚未成功").width;
 			var x = (WIDTH - width) / 2;
 			var y = (HEIGHT - 48) / 2;
-			ctx.fillText("GAME OVER",x,y);
+			ctx.fillText("革命尚未成功",x,y);
+
 		}
 
 		/***显示飞机大战LOGO***/
@@ -565,6 +566,8 @@
 			//如果状态为 START的话 ， 切换状态为 STARTING
 			if(state == START){
 				state = STARTING;
+			}else if(state==GAMEOVER){
+				//待做
 			}
 		}
 	</script>
